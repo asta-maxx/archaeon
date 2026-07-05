@@ -1,0 +1,99 @@
+{
+  "jobId": "test-job-id-123",
+  "branches": [
+    {
+      "name": "main",
+      "commit": {
+        "sha": "abcdef1234567890",
+        "url": "https://api.github.com/repos/owner/repo/commits/abcdef1234567890"
+      }
+    }
+  ],
+  "commits": [
+    {
+      "sha": "1234567890abcdef",
+      "commit": {
+        "author": { "name": "Alice Developer", "date": "2023-01-01T12:00:00Z" },
+        "message": "feat: add user login\n\nFixes #42"
+      },
+      "files": [
+        { "filename": "src/login.ts" },
+        { "filename": "test/login.spec.ts" }
+      ]
+    },
+    {
+      "sha": "deadbeefdeadbeef",
+      "commit": {
+        "author": { "name": "Bob Architect", "date": "2023-01-02T10:00:00Z" },
+        "message": "decision: use postgres instead of mongo\n\nWe need relational constraints."
+      }
+    },
+    {
+      "sha": "malformed-commit-no-author",
+      "commit": {
+        "message": "this should be skipped by parser if it throws on strict"
+      }
+    },
+    {
+      "sha": "malformed-commit-no-commit-object"
+    }
+  ],
+  "pullRequests": [
+    {
+      "number": 1,
+      "title": "Add user login",
+      "body": "This PR adds user login. Closes #42.",
+      "user": { "login": "alice" },
+      "state": "closed",
+      "merged_at": "2023-01-01T15:00:00Z",
+      "url": "https://api.github.com/repos/owner/repo/pulls/1"
+    },
+    {
+      "number": 2,
+      "title": "ADR: Database selection",
+      "body": "## Context\nWe need a DB.\n## Decision\nPostgres.",
+      "user": { "login": "bob" },
+      "state": "open",
+      "merged_at": null
+    },
+    {
+      "number": null,
+      "title": "Malformed PR missing number",
+      "user": { "login": "charlie" }
+    }
+  ],
+  "fileManifest": [
+    {
+      "path": "src/main.ts",
+      "type": "blob",
+      "size": 1500,
+      "content": "console.log('Hello');"
+    },
+    {
+      "path": "docs/adr/0001-database.md",
+      "type": "blob",
+      "size": 800,
+      "content": "# ADR 1: Database\nWe chose Postgres."
+    },
+    {
+      "path": "README.md",
+      "type": "blob",
+      "size": 300,
+      "content": "# Archaeon\nAwesome project."
+    },
+    {
+      "path": "unknown-file-no-extension",
+      "type": "blob",
+      "size": 10
+    },
+    {
+      "type": "blob",
+      "size": 50,
+      "missing_path": "true"
+    },
+    {
+      "path": "src/dir",
+      "type": "tree"
+    }
+  ]
+}

@@ -1,0 +1,2581 @@
+openapi: 3.0.3
+info:
+  title: Archaeon Ecosystem Backend API
+  version: 1.0.0
+  description: Production API orchestrator for workspaces, projects, repos, graphs
+    and memory persistence.
+paths:
+  /api/auth/github/callback/:
+    post:
+      operationId: api_auth_github_callback_create
+      description: Exchanges code from GitHub callback redirect for JWT authentication
+        tokens.
+      summary: GitHub OAuth Callback login handler
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GitHubLogin'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GitHubLogin'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GitHubLogin'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+          description: User successfully authenticated.
+        '401':
+          description: Authentication credentials rejected.
+  /api/auth/github/login/:
+    post:
+      operationId: api_auth_github_login_create
+      description: Returns the redirection URL to initiate GitHub OAuth callback handshake.
+      summary: Get GitHub OAuth Authorization URL
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: GitHub Authorization URL successfully generated.
+  /api/auth/logout/:
+    post:
+      operationId: api_auth_logout_create
+      description: Blacklists the provided refresh token, invalidating the session.
+      summary: Log out User session
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Logout'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Logout'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: Successfully logged out.
+        '401':
+          description: Invalid or expired token.
+  /api/auth/me/:
+    get:
+      operationId: api_auth_me_retrieve
+      description: Returns user details and organization workspaces listing.
+      summary: Retrieve Current User Profile
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CurrentUser'
+          description: Profile details retrieved.
+  /api/auth/refresh/:
+    post:
+      operationId: api_auth_refresh_create
+      description: Exchanges a valid refresh token for a new short-lived access token.
+      summary: Refresh Access Token
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefresh'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/internal/repository/process/:
+    post:
+      operationId: api_internal_repository_process_create
+      description: Private endpoint for the Repository Intelligence Service to trigger
+        processing syncs.
+      summary: Internal Repository Sync Callback
+      tags:
+      - api
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/invitations/accept/:
+    post:
+      operationId: api_invitations_accept_create
+      description: Accepts an invitation using the UUID token and adds user to Workspace.
+      summary: Accept Workspace Invitation
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AcceptInvitation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AcceptInvitation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AcceptInvitation'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/webhooks/github/:
+    post:
+      operationId: api_webhooks_github_create
+      description: Receives GitHub webhook updates, verifying payload authenticity
+        with HMAC-SHA256 signature.
+      summary: Ingest GitHub Webhook
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/:
+    get:
+      operationId: api_workspaces_list
+      description: ViewSet handling CRUD actions and ownership transfer for Workspace
+        workspaces.
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedWorkspaceCreateList'
+          description: ''
+    post:
+      operationId: api_workspaces_create
+      description: Creates a new multi-tenant workspace and registers current user
+        as Owner.
+      summary: Create Workspace
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceCreate'
+          description: ''
+  /api/workspaces/{id}/:
+    get:
+      operationId: api_workspaces_retrieve
+      description: ViewSet handling CRUD actions and ownership transfer for Workspace
+        workspaces.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Workspace.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceCreate'
+          description: ''
+    put:
+      operationId: api_workspaces_update
+      description: ViewSet handling CRUD actions and ownership transfer for Workspace
+        workspaces.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Workspace.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/WorkspaceCreate'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceCreate'
+          description: ''
+    patch:
+      operationId: api_workspaces_partial_update
+      description: ViewSet handling CRUD actions and ownership transfer for Workspace
+        workspaces.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Workspace.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkspaceCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkspaceCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedWorkspaceCreate'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceCreate'
+          description: ''
+    delete:
+      operationId: api_workspaces_destroy
+      description: Soft deletes the workspace, its projects, and memberships. Requires
+        Owner role.
+      summary: Delete Workspace
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Workspace.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{id}/transfer-ownership/:
+    post:
+      operationId: api_workspaces_transfer_ownership_create
+      description: Transfers the Owner role to another active member. Requires Owner
+        role.
+      summary: Transfer Workspace Ownership
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this Workspace.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OwnershipTransfer'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OwnershipTransfer'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OwnershipTransfer'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/:
+    get:
+      operationId: api_workspaces_decisions_list
+      description: Returns all active/non-superseded architecture decisions in the
+        workspace.
+      summary: List Active Decisions
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedArchitectureDecisionList'
+          description: ''
+    post:
+      operationId: api_workspaces_decisions_create
+      description: Creates a new architecture decision, logging the creation audit,
+        syncing to Neo4j graph and indexing in Cognée.
+      summary: Create/Remember Decision
+      parameters:
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchitectureDecision'
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/{id}/:
+    get:
+      operationId: api_workspaces_decisions_retrieve
+      description: ViewSet managing architecture decisions retrieval, lifecycles,
+        and audit trails.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchitectureDecision'
+          description: ''
+    put:
+      operationId: api_workspaces_decisions_update
+      description: Updates an existing decision record, creating an audit log trail,
+        syncing update to Neo4j and improve dataset in Cognée.
+      summary: Improve/Update Decision
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ArchitectureDecision'
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/{id}/forget/:
+    post:
+      operationId: api_workspaces_decisions_forget_create
+      description: Flags a decision as superseded (forces status forgotten) and logs
+        action history.
+      summary: Forget/Supersede Decision
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ArchitectureDecision'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/{id}/history/:
+    get:
+      operationId: api_workspaces_decisions_history_list
+      description: Returns chronological log trail tracking state changes for this
+        decision.
+      summary: Get Decision Audit History
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDecisionHistoryList'
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/{id}/supersession-chain/:
+    get:
+      operationId: api_workspaces_decisions_supersession_chain_retrieve
+      description: Returns the supersession hierarchy showing decisions lineage.
+      summary: Get Decision Supersession Chain
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/adr/{adr_number}/constraints/:
+    get:
+      operationId: api_workspaces_decisions_adr_constraints_retrieve
+      description: Returns constraints introduced in an ADR source identifier.
+      summary: Get ADR Constraints
+      parameters:
+      - in: path
+        name: adr_number
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/graph/:
+    get:
+      operationId: api_workspaces_decisions_graph_retrieve
+      description: Returns a React Flow nodes & edges snapshot representation of decisions
+        in the workspace.
+      summary: Retrieve Workspace Decisions Graph
+      parameters:
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/module/{module_name}/:
+    get:
+      operationId: api_workspaces_decisions_module_list
+      description: Filter workspace decisions affecting a specific component module.
+      summary: Get Decisions by Module
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: path
+        name: module_name
+        schema:
+          type: string
+        required: true
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedArchitectureDecisionList'
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/superseded/:
+    get:
+      operationId: api_workspaces_decisions_superseded_list
+      description: Returns decisions that have been forgotten/superseded in the workspace.
+      summary: List Superseded Decisions
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedArchitectureDecisionList'
+          description: ''
+  /api/workspaces/{workspace_id}/decisions/timeline/:
+    get:
+      operationId: api_workspaces_decisions_timeline_list
+      description: Returns a global chronological event feed tracking decision updates
+        and creation timelines.
+      summary: Retrieve Workspace Timeline
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDecisionHistoryList'
+          description: ''
+  /api/workspaces/{workspace_id}/invitations/:
+    get:
+      operationId: api_workspaces_invitations_list
+      description: ViewSet handling sending, listing, and revoking invitations in
+        workspace scope.
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedInvitationList'
+          description: ''
+    post:
+      operationId: api_workspaces_invitations_create
+      description: Generates an invitation token sent to email address. Requires Admin
+        role.
+      summary: Send Invitation
+      parameters:
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Invitation'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Invitation'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Invitation'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+          description: ''
+  /api/workspaces/{workspace_id}/invitations/{id}/:
+    get:
+      operationId: api_workspaces_invitations_retrieve
+      description: ViewSet handling sending, listing, and revoking invitations in
+        workspace scope.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invitation'
+          description: ''
+    delete:
+      operationId: api_workspaces_invitations_destroy
+      description: Revokes and deletes a pending workspace invitation. Requires Admin
+        role.
+      summary: Cancel Invitation
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/jobs/:
+    get:
+      operationId: api_workspaces_jobs_list
+      description: Returns list of all background orchestration jobs within target
+        workspace. Requires Viewer role.
+      summary: List Processing Jobs
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProcessingJobList'
+          description: ''
+  /api/workspaces/{workspace_id}/jobs/{id}/:
+    get:
+      operationId: api_workspaces_jobs_retrieve
+      description: Returns status details and progress percentage for a background
+        job. Requires Viewer role.
+      summary: Retrieve Processing Job Detail
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessingJob'
+          description: ''
+  /api/workspaces/{workspace_id}/members/:
+    get:
+      operationId: api_workspaces_members_list
+      description: ViewSet listing and editing membership roles within workspace scope.
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMemberList'
+          description: ''
+  /api/workspaces/{workspace_id}/members/{id}/:
+    get:
+      operationId: api_workspaces_members_retrieve
+      description: ViewSet listing and editing membership roles within workspace scope.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+    put:
+      operationId: api_workspaces_members_update
+      description: Updates the role of a workspace member. Requires Admin role.
+      summary: Update Member Role
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Member'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Member'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Member'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+    patch:
+      operationId: api_workspaces_members_partial_update
+      description: ViewSet listing and editing membership roles within workspace scope.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedMember'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedMember'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedMember'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Member'
+          description: ''
+    delete:
+      operationId: api_workspaces_members_destroy
+      description: Removes a member from the workspace. Requires Admin role.
+      summary: Remove Workspace Member
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/projects/:
+    get:
+      operationId: api_workspaces_projects_list
+      description: ViewSet handling CRUD actions for Projects within workspace scope.
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProjectList'
+          description: ''
+    post:
+      operationId: api_workspaces_projects_create
+      description: Creates a project inside the designated workspace. Requires Developer
+        role.
+      summary: Create Project
+      parameters:
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Project'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Project'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+  /api/workspaces/{workspace_id}/projects/{id}/:
+    get:
+      operationId: api_workspaces_projects_retrieve
+      description: ViewSet handling CRUD actions for Projects within workspace scope.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+    put:
+      operationId: api_workspaces_projects_update
+      description: ViewSet handling CRUD actions for Projects within workspace scope.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Project'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Project'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+    patch:
+      operationId: api_workspaces_projects_partial_update
+      description: ViewSet handling CRUD actions for Projects within workspace scope.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedProject'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedProject'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedProject'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+          description: ''
+    delete:
+      operationId: api_workspaces_projects_destroy
+      description: Soft deletes the project. Requires Developer role.
+      summary: Delete Project
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/repositories/:
+    get:
+      operationId: api_workspaces_repositories_list
+      description: ViewSet handling CRUD actions and metadata sync checks for Workspace
+        repositories.
+      parameters:
+      - name: limit
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: offset
+        required: false
+        in: query
+        description: The initial index from which to return the results.
+        schema:
+          type: integer
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRepositoryList'
+          description: ''
+    post:
+      operationId: api_workspaces_repositories_create
+      description: Imports and links a GitHub repository to the Workspace. Requires
+        Developer role.
+      summary: Import GitHub Repository
+      parameters:
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RepositoryImport'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RepositoryImport'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RepositoryImport'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcessingJob'
+          description: ''
+  /api/workspaces/{workspace_id}/repositories/{id}/:
+    get:
+      operationId: api_workspaces_repositories_retrieve
+      description: ViewSet handling CRUD actions and metadata sync checks for Workspace
+        repositories.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+          description: ''
+    delete:
+      operationId: api_workspaces_repositories_destroy
+      description: Soft deletes/unlinks the repository from the workspace. Requires
+        Developer role.
+      summary: Delete Repository Link
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/workspaces/{workspace_id}/repositories/{id}/refresh/:
+    post:
+      operationId: api_workspaces_repositories_refresh_create
+      description: Triggers synchronization check to refresh branch and visibility.
+        Requires Developer role.
+      summary: Refresh Repository Metadata
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: workspace_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Repository'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Repository'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Repository'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repository'
+          description: ''
+  /health/:
+    get:
+      operationId: health_retrieve
+      description: Handle GET requests for liveness status.
+      summary: Service Liveness Check
+      tags:
+      - health
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /ready/:
+    get:
+      operationId: ready_retrieve
+      description: Verify downstream connections and return status codes.
+      summary: Service Readiness Check
+      tags:
+      - ready
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '503':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    AcceptInvitation:
+      type: object
+      description: Serializer validating invitation accept action.
+      properties:
+        token:
+          type: string
+          format: uuid
+          description: The invitation UUID token to accept.
+      required:
+      - token
+    ArchitectureDecision:
+      type: object
+      description: Serializer representing complete ArchitectureDecision details.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        repository:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        status:
+          type: string
+          maxLength: 50
+        rationale:
+          type: string
+        module_name:
+          type: string
+          maxLength: 255
+        adr_source:
+          type: string
+          maxLength: 255
+        developer_name:
+          type: string
+          maxLength: 255
+        commit_hash:
+          type: string
+          maxLength: 100
+        pr_number:
+          type: string
+          maxLength: 100
+        incident_key:
+          type: string
+          maxLength: 100
+        superseded_by:
+          type: string
+          format: uuid
+          nullable: true
+        constraints:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionConstraint'
+          readOnly: true
+        alternatives:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionAlternative'
+          readOnly: true
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionHistory'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - alternatives
+      - constraints
+      - created_at
+      - history
+      - id
+      - repository
+      - title
+      - updated_at
+    CurrentUser:
+      type: object
+      description: Serializer mapping the authenticated user alongside list of workspaces.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        github_username:
+          type: string
+          nullable: true
+          maxLength: 100
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        is_staff:
+          type: boolean
+          readOnly: true
+        is_superuser:
+          type: boolean
+          readOnly: true
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        memberships:
+          type: array
+          items:
+            $ref: '#/components/schemas/Membership'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - id
+      - is_staff
+      - is_superuser
+      - memberships
+    DecisionAlternative:
+      type: object
+      description: Serializer for decision alternatives.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        alternative_text:
+          type: string
+      required:
+      - alternative_text
+      - id
+    DecisionConstraint:
+      type: object
+      description: Serializer for decision constraints.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        constraint_text:
+          type: string
+      required:
+      - constraint_text
+      - id
+    DecisionHistory:
+      type: object
+      description: Serializer for decision history audit trail.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        action_type:
+          type: string
+          maxLength: 50
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - action_type
+      - description
+      - id
+      - timestamp
+    GitHubLogin:
+      type: object
+      description: Serializer validating GitHub auth code query params sent by the
+        frontend.
+      properties:
+        code:
+          type: string
+          description: The code returned by GitHub OAuth authorize callback.
+        state:
+          type: string
+          description: Optional state validation token matching GitHub OAuth query.
+      required:
+      - code
+    Invitation:
+      type: object
+      description: Serializer mapping workspace invitation details.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        workspace:
+          type: string
+          format: uuid
+          readOnly: true
+        inviter:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        token:
+          type: string
+          format: uuid
+          readOnly: true
+        is_accepted:
+          type: boolean
+          readOnly: true
+        is_expired:
+          type: boolean
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - expires_at
+      - id
+      - inviter
+      - is_accepted
+      - is_expired
+      - token
+      - workspace
+    JobTypeEnum:
+      enum:
+      - repository_import
+      - webhook
+      - graph_update
+      - memory_update
+      - notification
+      type: string
+      description: |-
+        * `repository_import` - Repository Import
+        * `webhook` - Webhook Dispatch
+        * `graph_update` - Graph Timeline Update
+        * `memory_update` - Memory Graph Sync
+        * `notification` - Notification Dispatch
+    Logout:
+      type: object
+      description: Serializer validating logout token request payload.
+      properties:
+        refresh:
+          type: string
+          description: The refresh token string to invalidate and blacklist.
+      required:
+      - refresh
+    Member:
+      type: object
+      description: Serializer mapping workspace membership role details nested with
+        user profile info.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - user
+    Membership:
+      type: object
+      description: Serializer mapping user memberships within workspaces, including
+        nested workspace details.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        workspace:
+          allOf:
+          - $ref: '#/components/schemas/Workspace'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - workspace
+    OwnershipTransfer:
+      type: object
+      description: Serializer validating new owner selection on ownership transfer.
+      properties:
+        new_owner_id:
+          type: string
+          format: uuid
+          description: The UUID of the workspace member to receive ownership.
+      required:
+      - new_owner_id
+    PaginatedArchitectureDecisionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ArchitectureDecision'
+    PaginatedDecisionHistoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DecisionHistory'
+    PaginatedInvitationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Invitation'
+    PaginatedMemberList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Member'
+    PaginatedProcessingJobList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProcessingJob'
+    PaginatedProjectList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Project'
+    PaginatedRepositoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Repository'
+    PaginatedWorkspaceCreateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=400&limit=100
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?offset=200&limit=100
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkspaceCreate'
+    PatchedMember:
+      type: object
+      description: Serializer mapping workspace membership role details nested with
+        user profile info.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedProject:
+      type: object
+      description: Serializer mapping project workspace parameters.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        workspace:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedWorkspaceCreate:
+      type: object
+      description: Serializer validating workspace creation request payload.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+    ProcessingJob:
+      type: object
+      description: Serializer representing ProcessingJob attributes and execution
+        logs.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        job_type:
+          allOf:
+          - $ref: '#/components/schemas/JobTypeEnum'
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+        workspace:
+          type: string
+          format: uuid
+          readOnly: true
+        project:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        repository:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        requested_by:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        celery_task_id:
+          type: string
+          readOnly: true
+        progress:
+          type: integer
+          readOnly: true
+        retry_count:
+          type: integer
+          readOnly: true
+        started_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        completed_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        error_message:
+          type: string
+          readOnly: true
+        metadata:
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - celery_task_id
+      - completed_at
+      - created_at
+      - error_message
+      - id
+      - job_type
+      - metadata
+      - progress
+      - project
+      - repository
+      - requested_by
+      - retry_count
+      - started_at
+      - status
+      - updated_at
+      - workspace
+    ProcessingStatusEnum:
+      enum:
+      - idle
+      - queued
+      - processing
+      - completed
+      - failed
+      type: string
+      description: |-
+        * `idle` - Idle
+        * `queued` - Queued
+        * `processing` - Processing
+        * `completed` - Completed
+        * `failed` - Failed
+    Project:
+      type: object
+      description: Serializer mapping project workspace parameters.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        workspace:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+      - workspace
+    Repository:
+      type: object
+      description: Serializer representing full repository properties and metadata
+        statuses.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        workspace:
+          type: string
+          format: uuid
+          readOnly: true
+        project:
+          type: string
+          format: uuid
+          nullable: true
+        name:
+          type: string
+          maxLength: 255
+        full_name:
+          type: string
+          maxLength: 255
+        github_id:
+          type: string
+          maxLength: 100
+        html_url:
+          type: string
+          format: uri
+          maxLength: 200
+        clone_url:
+          type: string
+          format: uri
+          maxLength: 200
+        default_branch:
+          type: string
+          maxLength: 100
+        sync_branch:
+          type: string
+          maxLength: 100
+        visibility:
+          type: string
+          maxLength: 50
+        primary_language:
+          type: string
+          maxLength: 100
+        installation_id:
+          type: string
+          maxLength: 100
+        sync_status:
+          allOf:
+          - $ref: '#/components/schemas/SyncStatusEnum'
+          readOnly: true
+        processing_status:
+          allOf:
+          - $ref: '#/components/schemas/ProcessingStatusEnum'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - clone_url
+      - created_at
+      - full_name
+      - github_id
+      - html_url
+      - id
+      - name
+      - processing_status
+      - sync_status
+      - updated_at
+      - workspace
+    RepositoryImport:
+      type: object
+      description: Serializer validating incoming GitHub repository link and import
+        parameters.
+      properties:
+        project_id:
+          type: string
+          format: uuid
+          writeOnly: true
+          nullable: true
+        name:
+          type: string
+          maxLength: 255
+        full_name:
+          type: string
+          maxLength: 255
+        github_id:
+          type: string
+          maxLength: 100
+        html_url:
+          type: string
+          format: uri
+          maxLength: 200
+        clone_url:
+          type: string
+          format: uri
+          maxLength: 200
+        default_branch:
+          type: string
+          maxLength: 100
+        sync_branch:
+          type: string
+          maxLength: 100
+        visibility:
+          type: string
+          maxLength: 50
+        primary_language:
+          type: string
+          maxLength: 100
+        installation_id:
+          type: string
+          maxLength: 100
+        webhook_secret:
+          type: string
+          maxLength: 255
+      required:
+      - clone_url
+      - full_name
+      - github_id
+      - html_url
+      - name
+    RoleEnum:
+      enum:
+      - owner
+      - admin
+      - developer
+      - viewer
+      type: string
+      description: |-
+        * `owner` - Owner
+        * `admin` - Admin
+        * `developer` - Developer
+        * `viewer` - Viewer
+    StatusEnum:
+      enum:
+      - pending
+      - queued
+      - running
+      - success
+      - failed
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `queued` - Queued
+        * `running` - Running
+        * `success` - Success
+        * `failed` - Failed
+        * `cancelled` - Cancelled
+    SyncStatusEnum:
+      enum:
+      - pending
+      - syncing
+      - synced
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `syncing` - Syncing
+        * `synced` - Synced
+        * `failed` - Failed
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenResponse:
+      type: object
+      description: Serializer mapping successful access and refresh tokens response.
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    User:
+      type: object
+      description: Serializer representing user account profile data.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        email:
+          type: string
+          format: email
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        github_username:
+          type: string
+          nullable: true
+          maxLength: 100
+        avatar_url:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 500
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - id
+    Workspace:
+      type: object
+      description: Serializer mapping workspace properties.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - slug
+    WorkspaceCreate:
+      type: object
+      description: Serializer validating workspace creation request payload.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+      - slug
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

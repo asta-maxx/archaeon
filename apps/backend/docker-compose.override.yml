@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  backend:
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+      - DEBUG=True
+    ports:
+      - "8000:8000"
+
+  celery_worker:
+    command: watchfiles 'celery -A config worker --loglevel=debug' /app
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development
+
+  celery_beat:
+    volumes:
+      - .:/app
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.development

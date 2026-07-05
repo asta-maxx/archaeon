@@ -1,0 +1,391 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* Tailwind v4: dark mode via the .dark class on any ancestor */
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-kelvetica, ui-sans-serif, system-ui, -apple-system, sans-serif);
+  --font-mono: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+  --font-heading: var(--font-kelvetica, ui-sans-serif, system-ui, sans-serif);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Archaeon brand tokens */
+  --color-node-decision: var(--node-decision);
+  --color-node-constraint: var(--node-constraint);
+  --color-node-incident: var(--node-incident);
+  --color-node-adr: var(--node-adr);
+  --color-node-module: var(--node-module);
+  --color-node-developer: var(--node-developer);
+  --color-brand: var(--brand);
+  --color-brand-muted: var(--brand-muted);
+}
+
+/* ─── DARK THEME (default — applied when .dark class is present) ────────────── */
+/* These live in :root so they're the initial paint; ThemeProvider will apply
+   .dark on first render based on matchMedia, before first user interaction. */
+
+:root {
+  color-scheme: dark;
+
+  /* Archaeon deep dark palette */
+  --background: oklch(0.09 0.005 265);
+  --foreground: oklch(0.94 0.005 265);
+  --card: oklch(0.12 0.008 265);
+  --card-foreground: oklch(0.94 0.005 265);
+  --popover: oklch(0.13 0.008 265);
+  --popover-foreground: oklch(0.94 0.005 265);
+  --primary: oklch(0.72 0.2 265);
+  --primary-foreground: oklch(0.09 0.005 265);
+  --secondary: oklch(0.16 0.01 265);
+  --secondary-foreground: oklch(0.85 0.005 265);
+  --muted: oklch(0.16 0.01 265);
+  --muted-foreground: oklch(0.58 0.01 265);
+  --accent: oklch(0.18 0.015 265);
+  --accent-foreground: oklch(0.94 0.005 265);
+  --destructive: oklch(0.65 0.22 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.72 0.2 265);
+  --radius: 0.5rem;
+
+  /* Graph node type colors */
+  --node-decision: oklch(0.72 0.2 265);
+  --node-constraint: oklch(0.72 0.18 45);
+  --node-incident: oklch(0.65 0.22 25);
+  --node-adr: oklch(0.72 0.18 145);
+  --node-module: oklch(0.65 0.18 220);
+  --node-developer: oklch(0.72 0.18 300);
+  --brand: oklch(0.72 0.2 265);
+  --brand-muted: oklch(0.72 0.2 265 / 15%);
+
+  /* Node background fills (dark) */
+  --node-bg-decision: oklch(0.14 0.05 265);
+  --node-bg-module: oklch(0.14 0.04 220);
+  --node-bg-constraint: oklch(0.14 0.04 45);
+  --node-bg-developer: oklch(0.14 0.04 300);
+  --node-bg-incident: oklch(0.14 0.06 25 / 90%);
+  --node-bg-incident-selected: oklch(0.18 0.08 25 / 80%);
+  --node-bg-adr: oklch(0.14 0.04 145);
+
+  /* Sidebar */
+  --sidebar: oklch(0.11 0.008 265);
+  --sidebar-foreground: oklch(0.85 0.005 265);
+  --sidebar-primary: oklch(0.72 0.2 265);
+  --sidebar-primary-foreground: oklch(0.09 0.005 265);
+  --sidebar-accent: oklch(0.16 0.01 265);
+  --sidebar-accent-foreground: oklch(0.94 0.005 265);
+  --sidebar-border: oklch(1 0 0 / 6%);
+  --sidebar-ring: oklch(0.72 0.2 265);
+
+  /* Charts */
+  --chart-1: oklch(0.72 0.2 265);
+  --chart-2: oklch(0.72 0.18 145);
+  --chart-3: oklch(0.72 0.18 45);
+  --chart-4: oklch(0.65 0.22 25);
+  --chart-5: oklch(0.72 0.18 300);
+
+  /* Graph node bg/border for GraphNodes.tsx inline styles */
+  --graph-dot-color: oklch(1 0 0 / 5%);
+  --graph-minimap-mask: oklch(0.09 0.005 265 / 70%);
+  --graph-handle-color: oklch(1 0 0 / 30%);
+  --graph-node-label-dim: oklch(1 0 0 / 30%);
+}
+
+/* ─── LIGHT THEME ──────────────────────────────────────────────────────────────
+   Applied when .dark is NOT present on the html element.
+   Uses oklch with high L values for a warm-cool neutral surface feel.
+   Brand primary (violet-indigo) remains consistent; surfaces go to warm slate.
+────────────────────────────────────────────────────────────────────────────── */
+:root:not(.dark) {
+  color-scheme: light;
+
+  /* Surfaces — warm slate, not pure white */
+  --background: oklch(0.97 0.004 265);
+  --foreground: oklch(0.18 0.01 265);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.18 0.01 265);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.18 0.01 265);
+
+  /* Primary stays violet-indigo for brand consistency */
+  --primary: oklch(0.55 0.22 265);
+  --primary-foreground: oklch(0.98 0.002 265);
+
+  /* Secondary / muted — light slate-blue */
+  --secondary: oklch(0.93 0.008 265);
+  --secondary-foreground: oklch(0.28 0.01 265);
+  --muted: oklch(0.93 0.008 265);
+  --muted-foreground: oklch(0.48 0.01 265);
+  --accent: oklch(0.91 0.012 265);
+  --accent-foreground: oklch(0.18 0.01 265);
+
+  /* Semantic */
+  --destructive: oklch(0.55 0.22 25);
+  --border: oklch(0 0 0 / 10%);
+  --input: oklch(0 0 0 / 8%);
+  --ring: oklch(0.55 0.22 265);
+
+  /* Graph node type colors — light */
+  --node-decision: oklch(0.55 0.22 265);
+  --node-constraint: oklch(0.58 0.2 45);
+  --node-incident: oklch(0.55 0.22 25);
+  --node-adr: oklch(0.52 0.18 145);
+  --node-module: oklch(0.52 0.2 220);
+  --node-developer: oklch(0.55 0.2 300);
+  --brand: oklch(0.55 0.22 265);
+  --brand-muted: oklch(0.55 0.22 265 / 12%);
+
+  /* Node background fills (light — tinted white surfaces) */
+  --node-bg-decision: oklch(0.93 0.05 265);
+  --node-bg-module: oklch(0.93 0.04 220);
+  --node-bg-constraint: oklch(0.94 0.04 45);
+  --node-bg-developer: oklch(0.93 0.04 300);
+  --node-bg-incident: oklch(0.93 0.06 25 / 90%);
+  --node-bg-incident-selected: oklch(0.88 0.08 25 / 80%);
+  --node-bg-adr: oklch(0.93 0.04 145);
+
+  /* Sidebar — slightly off-white, clean */
+  --sidebar: oklch(0.975 0.006 265);
+  --sidebar-foreground: oklch(0.28 0.01 265);
+  --sidebar-primary: oklch(0.55 0.22 265);
+  --sidebar-primary-foreground: oklch(0.98 0.002 265);
+  --sidebar-accent: oklch(0.91 0.012 265);
+  --sidebar-accent-foreground: oklch(0.18 0.01 265);
+  --sidebar-border: oklch(0 0 0 / 8%);
+  --sidebar-ring: oklch(0.55 0.22 265);
+
+  /* Charts — keep same hues, adjust lightness for legibility on white */
+  --chart-1: oklch(0.55 0.22 265);
+  --chart-2: oklch(0.52 0.18 145);
+  --chart-3: oklch(0.58 0.2 45);
+  --chart-4: oklch(0.55 0.22 25);
+  --chart-5: oklch(0.55 0.2 300);
+
+  /* Graph internals */
+  --graph-dot-color: oklch(0 0 0 / 5%);
+  --graph-minimap-mask: oklch(0.97 0.004 265 / 70%);
+  --graph-handle-color: oklch(0 0 0 / 20%);
+  --graph-node-label-dim: oklch(0 0 0 / 35%);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+}
+
+/* ─── Archaeon custom utilities ──────────────────────────────────────────────── */
+@layer utilities {
+  .graph-glow {
+    box-shadow: 0 0 20px var(--brand-muted);
+  }
+  .graph-glow-sm {
+    box-shadow: 0 0 10px var(--brand-muted);
+  }
+  .node-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .connection-line {
+    position: absolute;
+    background: linear-gradient(90deg, transparent, oklch(from var(--brand) l c h / 30%), transparent);
+    height: 1px;
+  }
+
+  /* Dark mode gradient border */
+  .dark .gradient-border {
+    background: linear-gradient(var(--card), var(--card)) padding-box,
+      linear-gradient(135deg, oklch(0.72 0.2 265 / 40%), oklch(0.72 0.18 145 / 20%),
+        oklch(0.72 0.2 265 / 10%)) border-box;
+    border: 1px solid transparent;
+  }
+  /* Light mode gradient border */
+  :root:not(.dark) .gradient-border {
+    background: linear-gradient(var(--card), var(--card)) padding-box,
+      linear-gradient(135deg, oklch(0.55 0.22 265 / 25%), oklch(0.52 0.18 145 / 12%),
+        oklch(0.55 0.22 265 / 8%)) border-box;
+    border: 1px solid transparent;
+  }
+
+  .dark .text-gradient {
+    background: linear-gradient(135deg, oklch(0.94 0.005 265), oklch(0.72 0.2 265));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  :root:not(.dark) .text-gradient {
+    background: linear-gradient(135deg, oklch(0.18 0.01 265), oklch(0.55 0.22 265));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .dark .text-gradient-brand {
+    background: linear-gradient(135deg, oklch(0.85 0.1 265), oklch(0.72 0.2 265), oklch(0.65 0.22 300));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  :root:not(.dark) .text-gradient-brand {
+    background: linear-gradient(135deg, oklch(0.45 0.2 265), oklch(0.55 0.22 265), oklch(0.5 0.22 300));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted-foreground) transparent;
+  }
+
+  .dark .grid-bg {
+    background-image:
+      linear-gradient(oklch(1 0 0 / 3%) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(1 0 0 / 3%) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  :root:not(.dark) .grid-bg {
+    background-image:
+      linear-gradient(oklch(0 0 0 / 4%) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0 0 0 / 4%) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+}
+
+/* ─── React Flow overrides — dark ────────────────────────────────────────────── */
+.dark .react-flow__background {
+  background-color: transparent !important;
+}
+.dark .react-flow__controls {
+  background: oklch(0.12 0.008 265 / 90%) !important;
+  border: 1px solid oklch(1 0 0 / 8%) !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  backdrop-filter: blur(8px);
+}
+.dark .react-flow__controls-button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid oklch(1 0 0 / 8%) !important;
+  color: oklch(0.58 0.01 265) !important;
+  fill: oklch(0.58 0.01 265) !important;
+  transition: color 0.15s, fill 0.15s;
+}
+.dark .react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+.dark .react-flow__controls-button:hover {
+  background: oklch(1 0 0 / 5%) !important;
+  color: oklch(0.94 0.005 265) !important;
+  fill: oklch(0.94 0.005 265) !important;
+}
+.dark .react-flow__minimap {
+  background: oklch(0.12 0.008 265 / 90%) !important;
+  border: 1px solid oklch(1 0 0 / 8%) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+.dark .react-flow__edge-path {
+  transition: stroke-width 0.15s, opacity 0.15s;
+}
+.dark .react-flow__node {
+  cursor: pointer;
+}
+.dark .react-flow__node.selected > div {
+  transform: scale(1.05);
+}
+
+/* ─── React Flow overrides — light ───────────────────────────────────────────── */
+:root:not(.dark) .react-flow__background {
+  background-color: transparent !important;
+}
+:root:not(.dark) .react-flow__controls {
+  background: oklch(1 0 0 / 92%) !important;
+  border: 1px solid oklch(0 0 0 / 10%) !important;
+  border-radius: 10px !important;
+  box-shadow: 0 2px 8px oklch(0 0 0 / 8%) !important;
+  backdrop-filter: blur(8px);
+}
+:root:not(.dark) .react-flow__controls-button {
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid oklch(0 0 0 / 8%) !important;
+  color: oklch(0.48 0.01 265) !important;
+  fill: oklch(0.48 0.01 265) !important;
+  transition: color 0.15s, fill 0.15s;
+}
+:root:not(.dark) .react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+:root:not(.dark) .react-flow__controls-button:hover {
+  background: oklch(0 0 0 / 4%) !important;
+  color: oklch(0.18 0.01 265) !important;
+  fill: oklch(0.18 0.01 265) !important;
+}
+:root:not(.dark) .react-flow__minimap {
+  background: oklch(1 0 0 / 92%) !important;
+  border: 1px solid oklch(0 0 0 / 10%) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 2px 8px oklch(0 0 0 / 8%);
+}
+:root:not(.dark) .react-flow__edge-path {
+  transition: stroke-width 0.15s, opacity 0.15s;
+}
+:root:not(.dark) .react-flow__node {
+  cursor: pointer;
+}
+:root:not(.dark) .react-flow__node.selected > div {
+  transform: scale(1.05);
+}

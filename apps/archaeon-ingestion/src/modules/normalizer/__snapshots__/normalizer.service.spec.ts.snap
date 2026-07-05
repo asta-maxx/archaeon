@@ -1,0 +1,117 @@
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+
+exports[`NormalizerService should generate a deterministic snapshot for the raw payload fixture 1`] = `
+{
+  "adrCandidates": [
+    {
+      "context": "Commit by Bob Architect on 2023-01-02T10:00:00Z",
+      "rawText": "decision: use postgres instead of mongo
+
+We need relational constraints.",
+      "sourceRef": "deadbeefdeadbeef",
+      "sourceType": "commit",
+    },
+    {
+      "context": "PR #2 by bob (State: open)",
+      "rawText": "ADR: Database selection
+## Context
+We need a DB.
+## Decision
+Postgres.",
+      "sourceRef": "2",
+      "sourceType": "pr",
+    },
+    {
+      "context": "File docs/adr/0001-database.md (800 bytes)",
+      "rawText": "# ADR 1: Database
+We chose Postgres.",
+      "sourceRef": "docs/adr/0001-database.md",
+      "sourceType": "file",
+    },
+  ],
+  "commits": [
+    {
+      "author": "Alice Developer",
+      "date": "2023-01-01T12:00:00Z",
+      "filesChanged": [
+        "src/login.ts",
+        "test/login.spec.ts",
+      ],
+      "message": "feat: add user login
+
+Fixes #42",
+      "sha": "1234567890abcdef",
+    },
+    {
+      "author": "Bob Architect",
+      "date": "2023-01-02T10:00:00Z",
+      "filesChanged": [],
+      "message": "decision: use postgres instead of mongo
+
+We need relational constraints.",
+      "sha": "deadbeefdeadbeef",
+    },
+    {
+      "author": "unknown",
+      "date": "1970-01-01T00:00:00.000Z",
+      "filesChanged": [],
+      "message": "this should be skipped by parser if it throws on strict",
+      "sha": "malformed-commit-no-author",
+    },
+  ],
+  "files": [
+    {
+      "content": "console.log('Hello');",
+      "language": "TypeScript",
+      "path": "src/main.ts",
+      "sizeBytes": 1500,
+    },
+    {
+      "content": "# ADR 1: Database
+We chose Postgres.",
+      "language": "Markdown",
+      "path": "docs/adr/0001-database.md",
+      "sizeBytes": 800,
+    },
+    {
+      "content": "# Archaeon
+Awesome project.",
+      "language": "Markdown",
+      "path": "README.md",
+      "sizeBytes": 300,
+    },
+    {
+      "content": undefined,
+      "language": "unknown",
+      "path": "unknown-file-no-extension",
+      "sizeBytes": 10,
+    },
+  ],
+  "jobId": "test-job-id-123",
+  "pullRequests": [
+    {
+      "author": "alice",
+      "body": "This PR adds user login. Closes #42.",
+      "filesChanged": [],
+      "linkedCommits": [],
+      "mergedAt": "2023-01-01T15:00:00Z",
+      "number": 1,
+      "state": "closed",
+      "title": "Add user login",
+    },
+    {
+      "author": "bob",
+      "body": "## Context
+We need a DB.
+## Decision
+Postgres.",
+      "filesChanged": [],
+      "linkedCommits": [],
+      "mergedAt": null,
+      "number": 2,
+      "state": "open",
+      "title": "ADR: Database selection",
+    },
+  ],
+}
+`;
